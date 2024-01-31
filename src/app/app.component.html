@@ -3,6 +3,7 @@
 <img [src]="SiteData.LogoImage" width={{SiteData.Width}} height="{{SiteData.Height}}"   alt="image">
 <h2 [style.text-align]="textAlignment()">Clicks Count</h2>
 <div class="center">
-<button (click)="ButnClick()"><h3>Click Here</h3></button>
+<button (click)="ButnClick(true)"><h3>Click Here ++</h3></button> &nbsp;
+<button (click)="ButnClick(false)"><h3>Click Here --</h3></button>
 </div>
 <h4 [style.text-align]="textAlignment()">{{Count == 0 ? '' : Count}}</h4>

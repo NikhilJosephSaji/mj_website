@@ -31,9 +31,12 @@ export class AppComponent {
     return "center";
   }
 
-  public ButnClick()
+  public ButnClick(isAdd : boolean)
   {
-    this.Count++;
+    if(isAdd)
+     this.Count++;
+    else
+     this.Count--;
     return this.Count;
   }
 }
