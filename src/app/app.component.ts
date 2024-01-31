@@ -10,6 +10,7 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   public Name = 'MidhunJith MJ';
+  public Count = 0;
 
   public ngOnInit()
   {
@@ -28,5 +29,11 @@ export class AppComponent {
   public textAlignment()
   {
     return "center";
+  }
+
+  public ButnClick()
+  {
+    this.Count++;
+    return this.Count;
   }
 }
