@@ -9,5 +9,17 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'mj_website';
+  public Name = 'MidhunJith MJ';
+
+  public ngOnInit()
+  {
+   
+  } 
+
+  SiteData = {
+    LogoImage : 'favicon.ico',
+    PhotoOne : 'Path',
+    Width : '70',
+    Height : '70'
+  }
 }
