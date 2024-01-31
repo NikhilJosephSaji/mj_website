@@ -13,13 +13,20 @@ export class AppComponent {
 
   public ngOnInit()
   {
-   
+    this.Name = "MidhunJith (MJ)"
+    this.SiteData.Height = '70'
+    this.SiteData.Width = '70'
   } 
 
   SiteData = {
     LogoImage : 'favicon.ico',
     PhotoOne : 'Path',
-    Width : '70',
-    Height : '70'
+    Width : '',
+    Height : ''
+  }
+
+  public textAlignment()
+  {
+    return "center";
   }
 }
