@@ -1,3 +1,4 @@
+<div>
 <h1 [style.text-align]="alignment()">Website of {{Name}}</h1> <!-- Value Passed -->
 <p [style.text-align]="alignment()">{{SiteData.LogoImage}}</p>
 <div class="center">
@@ -14,18 +15,26 @@
 </div>
 <h4 [style.text-align]="alignment()">{{strContent}}</h4>
 <div class="center">
-  <table>
-    <thead>
-      <th>Name</th>
-      <th>Price</th>
-      <th>Image</th>
-   </thead>
-   <tbody *ngFor="let fruit of Fruits">
+  <table>  
+    <tbody>
       <tr>
-        <td>{{fruit.name}}</td>
-        <td>{{fruit.price}}</td>
+        <td width={{SiteData.Width}}><b>Name</b></td>
+        <td width={{SiteData.Width}}><b>Price</b></td>
+        <td width={{SiteData.Width}}><b>Image</b></td>
+      </tr>
+    </tbody>
+    </table>
+</div>
+<br>
+<div class="center">
+  <table>   
+   <tbody *ngFor="let fruit of Fruits">    
+      <tr>
+        <td width={{SiteData.Width}}>{{fruit.name}}</td>
+        <td width={{SiteData.Width}}>{{fruit.price}}</td>
         <td><img src={{fruit.image}} width={{SiteData.Width}} height="{{SiteData.Height}}" ></td>
       </tr>
    </tbody>
   </table>
+</div>
 </div>
