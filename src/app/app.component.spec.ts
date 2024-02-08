@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { FormsModule } from '@angular/forms';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
@@ -7,6 +8,14 @@ describe('AppComponent', () => {
       imports: [AppComponent],
     }).compileComponents();
   });
+
+  @NgModule({
+    imports: [
+      [...]
+      FormsModule
+    ],
+    [...]
+  })
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);

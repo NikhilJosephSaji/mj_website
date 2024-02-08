@@ -1,9 +1,31 @@
-<h1 [style.text-align]="textAlignment()">Website of {{Name}}</h1> <!-- Value Passed -->
-<p>{{SiteData.LogoImage}}</p>
-<img [src]="SiteData.LogoImage" width={{SiteData.Width}} height="{{SiteData.Height}}"   alt="image">
-<h2 [style.text-align]="textAlignment()">Clicks Count</h2>
+<h1 [style.text-align]="alignment()">Website of {{Name}}</h1> <!-- Value Passed -->
+<p [style.text-align]="alignment()">{{SiteData.LogoImage}}</p>
 <div class="center">
-<button (click)="ButnClick(true)"><h3>Click Here ++</h3></button> &nbsp;
-<button (click)="ButnClick(false)"><h3>Click Here --</h3></button>
+<img [src]="SiteData.LogoImage" width={{SiteData.Width}} height="{{SiteData.Height}}"   alt="image">
 </div>
-<h4 [style.text-align]="textAlignment()">{{Count == 0 ? '' : Count}}</h4>
+<h3 [style.text-align]="alignment()">Clicks Count</h3>
+<div class="center">
+<button (click)="ButnClick(true)"><h4>Click Here ++</h4></button> &nbsp;
+<button (click)="ButnClick(false)"><h4>Click Here --</h4></button>
+</div>
+<h4 [style.text-align]="alignment()">{{Count == 0 ? '' : Count}}</h4>
+<div class="center">
+<input type="text" placeholder="Type Text Here" [style.text-align]="alignment()" [(ngModel)]="strContent">
+</div>
+<h4 [style.text-align]="alignment()">{{strContent}}</h4>
+<div class="center">
+  <table>
+    <thead>
+      <th>Name</th>
+      <th>Price</th>
+      <th>Image</th>
+   </thead>
+   <tbody *ngFor="let fruit of Fruits">
+      <tr>
+        <td>{{fruit.name}}</td>
+        <td>{{fruit.price}}</td>
+        <td><img src={{fruit.image}} width={{SiteData.Width}} height="{{SiteData.Height}}" ></td>
+      </tr>
+   </tbody>
+  </table>
+</div>
