@@ -8,13 +8,6 @@ describe('AppComponent', () => {
       imports: [AppComponent],
     }).compileComponents();
   });
-
-  @NgModule({
-    imports: [
-      [...]
-      FormsModule
-    ],
-    [...]
   })
 
   it('should create the app', () => {
@@ -35,4 +28,3 @@ describe('AppComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Hello, mj_website');
   });
-});
