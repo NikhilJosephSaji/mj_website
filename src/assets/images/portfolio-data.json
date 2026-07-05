@@ -1,4 +1,101 @@
 {
-  "images": [],
-  "heroBg": "assets/images/hero.jpg"
+  "images": [
+    {
+      "id": "img_1783244370336_26zvv",
+      "filename": "1_1783244370331.jpg",
+      "path": "/api/assets/wedding-films/1_1783244370331.jpg",
+      "title": "Weeding",
+      "category": "wedding-films",
+      "categoryLabel": "Wedding Films",
+      "description": "",
+      "location": "Europe",
+      "videoUrl": null,
+      "addedAt": 1783244370336
+    },
+    {
+      "id": "img_1783244400854_7e473",
+      "filename": "2_1783244400851.jpg",
+      "path": "/api/assets/wedding-films/2_1783244400851.jpg",
+      "title": "Wedding",
+      "category": "wedding-films",
+      "categoryLabel": "Wedding Films",
+      "description": "",
+      "location": "USA",
+      "videoUrl": null,
+      "addedAt": 1783244400854
+    },
+    {
+      "id": "img_1783244429189_zizsh",
+      "filename": "3_1783244429184.jpg",
+      "path": "/api/assets/portraits/3_1783244429184.jpg",
+      "title": "Portraits",
+      "category": "portraits",
+      "categoryLabel": "Portraits",
+      "description": "",
+      "location": "Alappuzha",
+      "videoUrl": null,
+      "addedAt": 1783244429189
+    },
+    {
+      "id": "img_1783244449032_9nqw7",
+      "filename": "4_1783244449027.jpg",
+      "path": "/api/assets/portraits/4_1783244449027.jpg",
+      "title": "Portraits",
+      "category": "portraits",
+      "categoryLabel": "Portraits",
+      "description": "",
+      "location": "Kochi",
+      "videoUrl": null,
+      "addedAt": 1783244449032
+    },
+    {
+      "id": "img_1783244519659_vghk6",
+      "filename": "5_1783244519643.jpg",
+      "path": "/api/assets/destination/5_1783244519643.jpg",
+      "title": "Munnar",
+      "category": "destination",
+      "categoryLabel": "Destination",
+      "description": "",
+      "location": "Munnar",
+      "videoUrl": null,
+      "addedAt": 1783244519659
+    },
+    {
+      "id": "img_1783244535785_ag7n4",
+      "filename": "6_1783244535783.jpg",
+      "path": "/api/assets/destination/6_1783244535783.jpg",
+      "title": "Cherai",
+      "category": "destination",
+      "categoryLabel": "Destination",
+      "description": "",
+      "location": "Cherai",
+      "videoUrl": null,
+      "addedAt": 1783244535785
+    },
+    {
+      "id": "img_1783244557308_ns6l5",
+      "filename": "7_1783244557305.jpg",
+      "path": "/api/assets/destination/7_1783244557305.jpg",
+      "title": "Athirapally",
+      "category": "destination",
+      "categoryLabel": "Destination",
+      "description": "",
+      "location": "Athirapally",
+      "videoUrl": null,
+      "addedAt": 1783244557308
+    },
+    {
+      "id": "img_1783244946727_g8p3k",
+      "filename": "9_1783244946720.jpg",
+      "path": "/api/assets/cinematic-reels/9_1783244946720.jpg",
+      "title": "Reel",
+      "category": "cinematic-reels",
+      "categoryLabel": "Cinematic Reels",
+      "description": "",
+      "location": "Palakkad",
+      "videoUrl": "https://youtube.com/shorts/Ity04w0tR4w?si=RMeUMPhYcSIwAmu6",
+      "addedAt": 1783244946727
+    }
+  ],
+  "heroBg": "/api/assets/hero.jpeg"
 }
