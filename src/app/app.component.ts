@@ -79,7 +79,8 @@ export class AppComponent implements OnInit {
   }
 
   heroBgUrl = '/api/assets/hero.jpg';
-  aboutPhotoUrl: string | null = '/api/assets/midhun.jpg';
+  aboutPhotoUrl: string | null = null;
+  hasAboutPhotoError = false;
 
   ngOnInit() {
     this.loadPortfolioItems();
@@ -98,12 +99,21 @@ export class AppComponent implements OnInit {
   loadAboutPhoto() {
     this.adminService.getAboutPhoto().subscribe({
       next: photo => {
-        this.aboutPhotoUrl = photo;
+        if (photo) {
+          this.aboutPhotoUrl = photo;
+          this.hasAboutPhotoError = false;
+        } else {
+          this.aboutPhotoUrl = null;
+        }
       },
       error: () => {
-        this.aboutPhotoUrl = '/api/assets/midhun.jpg';
+        this.aboutPhotoUrl = null;
       }
     });
+  }
+
+  onAboutPhotoError() {
+    this.hasAboutPhotoError = true;
   }
 
   onHeroClick() {
