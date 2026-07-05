@@ -25,6 +25,13 @@ export function app(): express.Express {
   const DATA_FILE      = join(ASSETS_ROOT, 'portfolio-data.json');
 
   const CATEGORY_FOLDERS: Record<string, string> = {
+    'wedding-films':   'wedding-films',
+    'portraits':       'portraits',
+    'destination':     'destination',
+    'cinematic-reels': 'cinematic-reels',
+  };
+
+  const CATEGORY_LABELS: Record<string, string> = {
     'wedding-films':   'Wedding Films',
     'portraits':       'Portraits',
     'destination':     'Destination',
@@ -33,7 +40,7 @@ export function app(): express.Express {
 
   function readData() {
     try   { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); }
-    catch { return { images: [], heroBg: 'assets/images/hero.png' }; }
+    catch { return { images: [], heroBg: '/api/assets/hero.jpg' }; }
   }
 
   function writeData(data: any) {
@@ -49,12 +56,13 @@ export function app(): express.Express {
     return 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
   }
 
+  ensureDir(ASSETS_ROOT);
   Object.values(CATEGORY_FOLDERS).forEach(f => ensureDir(join(ASSETS_ROOT, f)));
 
   const categoryStorage = multer.diskStorage({
     destination(req, file, cb) {
       const category = req.body.category || (req.query['category'] as string) || '';
-      const folder   = CATEGORY_FOLDERS[category] || 'Uncategorised';
+      const folder   = CATEGORY_FOLDERS[category] || 'uncategorised';
       const dir      = join(ASSETS_ROOT, folder);
       ensureDir(dir);
       cb(null, dir);
@@ -83,6 +91,9 @@ export function app(): express.Express {
   server.use(cors());
   server.use(express.json());
 
+  // Serve image assets dynamically directly from disk
+  server.use('/api/assets', express.static(ASSETS_ROOT));
+
   server.get('/api/images', (req: Request, res: Response): void => {
     const data = readData();
     const category = req.query['category'] as string;
@@ -98,24 +109,22 @@ export function app(): express.Express {
       return;
     }
     const { category, title, description, location, videoUrl } = req.body;
-    const targetFolder  = CATEGORY_FOLDERS[category] || 'Uncategorised';
-    const targetDir     = join(ASSETS_ROOT, targetFolder);
+    const targetFolder = CATEGORY_FOLDERS[category] || 'uncategorised';
+    const targetDir    = join(ASSETS_ROOT, targetFolder);
     ensureDir(targetDir);
 
     let finalFilename = req.file.filename;
-    let finalFilePath = req.file.path;
 
     if (dirname(req.file.path) !== targetDir) {
       const newPath = join(targetDir, req.file.filename);
       try {
         fs.renameSync(req.file.path, newPath);
-        finalFilePath = newPath;
       } catch (e) {
         console.error('Error moving file:', e);
       }
     }
 
-    const relPath = `assets/images/${targetFolder}/${finalFilename}`;
+    const relPath = `/api/assets/${targetFolder}/${finalFilename}`;
 
     const entry = {
       id:            generateId(),
@@ -123,7 +132,7 @@ export function app(): express.Express {
       path:          relPath,
       title:         (title || req.file.originalname).trim(),
       category,
-      categoryLabel: targetFolder,
+      categoryLabel: CATEGORY_LABELS[category] || targetFolder,
       description:   (description || '').trim(),
       location:      (location || 'India').trim(),
       videoUrl:      videoUrl || null,
@@ -165,7 +174,9 @@ export function app(): express.Express {
     }
 
     const img = data.images[idx];
-    const filePath = join(ASSETS_ROOT, img.filename);
+    const subPath  = img.path.replace(/^\/api\/assets\//, '');
+    const filePath = join(ASSETS_ROOT, subPath);
+
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
     data.images.splice(idx, 1);
@@ -178,7 +189,7 @@ export function app(): express.Express {
       res.status(400).json({ error: 'No file uploaded' });
       return;
     }
-    const relPath = `assets/images/${req.file.filename}`;
+    const relPath = `/api/assets/${req.file.filename}`;
     const data    = readData();
     data.heroBg   = relPath;
     writeData(data);
@@ -187,7 +198,7 @@ export function app(): express.Express {
 
   server.get('/api/hero-bg', (_req: Request, res: Response): void => {
     const data = readData();
-    res.json({ heroBg: data.heroBg || 'assets/images/hero.png' });
+    res.json({ heroBg: data.heroBg || '/api/assets/hero.jpg' });
   });
 
   server.get('*.*', express.static(browserDistFolder, {
