@@ -1,5 +1,6 @@
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AdminDataService, CategoryKey } from './admin/admin-data.service';
@@ -46,7 +47,7 @@ export class AppComponent implements OnInit {
 
   // Lightbox Modal state
   activeLightboxItem: PortfolioItem | null = null;
-  activeVideoUrl: string | null = null;
+  activeVideoUrl: SafeResourceUrl | null = null;
 
   // Booking Form State
   bookingForm = {
@@ -68,6 +69,7 @@ export class AppComponent implements OnInit {
   constructor(
     private adminService: AdminDataService,
     private router: Router,
+    private sanitizer: DomSanitizer,
     @Inject(PLATFORM_ID) platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -107,88 +109,29 @@ export class AppComponent implements OnInit {
     this.heroClickTimer = setTimeout(() => { this.heroClickCount = 0; }, 2500);
   }
 
-  // ── Default fallback portfolio items ─────────────────────────────
-  private defaultPortfolioItems: PortfolioItem[] = [
-    {
-      id: 1,
-      title: 'Eternal Grace at Sunset',
-      category: 'weddings',
-      categoryLabel: 'Cinematic Wedding Film',
-      image: 'assets/images/hero.png',
-      location: 'Udaipur, Rajasthan',
-      description: 'A breathtaking celebration of love amidst golden heritage lakes.',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    },
-    {
-      id: 2,
-      title: 'Soulful Bride & Shadows',
-      category: 'portraits',
-      categoryLabel: 'Candid Portraiture',
-      image: 'assets/images/portrait.png',
-      location: 'Kochi, Kerala',
-      description: 'Capturing quiet, intimate emotional glances before stepping down the aisle.'
-    },
-    {
-      id: 3,
-      title: 'Whispering Pines & Mountain Trails',
-      category: 'destination',
-      categoryLabel: 'Destination Story',
-      image: 'assets/images/destination.png',
-      location: 'Manali, Himachal Pradesh',
-      description: 'An ethereal pre-wedding love story shot across misty pine forest slopes.'
-    },
-    {
-      id: 4,
-      title: 'The Royal Heritage Teaser',
-      category: 'cinematic',
-      categoryLabel: 'Cinematic Reel',
-      image: 'assets/images/hero.png',
-      location: 'Jaipur, Rajasthan',
-      description: 'Slow-motion 4K anamorphic frames capturing royal grandeur and heartfelt emotion.'
-    },
-    {
-      id: 5,
-      title: 'Monsoon Romance & Whispers',
-      category: 'weddings',
-      categoryLabel: 'Wedding Story',
-      image: 'assets/images/portrait.png',
-      location: 'Wayand, Kerala',
-      description: 'Atmospheric rain-soaked moments filled with candid giggles and soulful promises.'
-    },
-    {
-      id: 6,
-      title: 'Cinematic Wanderlust',
-      category: 'destination',
-      categoryLabel: 'Destination Film',
-      image: 'assets/images/destination.png',
-      location: 'Available Worldwide',
-      description: 'Traveling across borders to craft timeless visual legacies.'
-    }
-  ];
-
+  // ── Portfolio loading from server API ────────────────────────────
   portfolioItems: PortfolioItem[] = [];
 
   loadPortfolioItems() {
     this.adminService.getAllImages().subscribe({
       next: adminImages => {
-        if (adminImages.length > 0) {
+        if (adminImages && adminImages.length > 0) {
           this.portfolioItems = adminImages.map(img => ({
             id: img.addedAt,
             title: img.title,
             category: this.mapCategory(img.category),
             categoryLabel: img.categoryLabel,
-            image: img.path,          // real file path served as static asset
+            image: img.path,          // real file path from server
             location: img.location,
             description: img.description,
             videoUrl: img.videoUrl ?? undefined
           }));
         } else {
-          this.portfolioItems = [...this.defaultPortfolioItems];
+          this.portfolioItems = [];
         }
       },
       error: () => {
-        // API not yet available — use defaults
-        this.portfolioItems = [...this.defaultPortfolioItems];
+        this.portfolioItems = [];
       }
     });
   }
@@ -280,13 +223,26 @@ export class AppComponent implements OnInit {
   }
 
   openVideoModal(url: string | undefined, event?: Event) {
-    if (event) event.stopPropagation();
-    if (url) {
-      this.activeVideoUrl = url;
-    } else {
-      // Default video preview placeholder
-      this.activeVideoUrl = 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
     }
+    const targetUrl = url && url.trim() ? url.trim() : 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+    this.activeVideoUrl = this.getSafeVideoUrl(targetUrl);
+  }
+
+  private getSafeVideoUrl(rawUrl: string): SafeResourceUrl {
+    let embedUrl = rawUrl.trim();
+
+    // Convert youtube.com/watch?v=ID or youtu.be/ID or youtube.com/shorts/ID to embed format
+    const ytMatch = embedUrl.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/))([\w-]{11})/);
+    if (ytMatch && ytMatch[1]) {
+      embedUrl = `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1`;
+    } else if (!embedUrl.startsWith('http://') && !embedUrl.startsWith('https://')) {
+      embedUrl = `https://${embedUrl}`;
+    }
+
+    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
   }
 
   closeVideoModal() {
