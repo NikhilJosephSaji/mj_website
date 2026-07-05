@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="100%" height="100%">
+  <defs>
+    <!-- Mask for horizontal cut out for FILMS text -->
+    <mask id="mj-cutout">
+      <!-- Full white background allows everything to show -->
+      <rect x="0" y="0" width="400" height="300" fill="#ffffff" />
+      <!-- Black rectangle cuts out the slot for FILMS text -->
+      <rect x="30" y="132" width="340" height="36" fill="#000000" />
+    </mask>
+  </defs>
+  
+  <g class="logo-group">
+    <!-- Top & Bottom halves of M and J using cut mask -->
+    <g mask="url(#mj-cutout)">
+      <!-- Letter M -->
+      <path d="M 60 50 L 115 50 L 155 160 L 195 50 L 250 50 L 250 250 L 202 250 L 202 115 L 170 205 L 140 205 L 108 115 L 108 250 L 60 250 Z" fill="currentColor"/>
+      
+      <!-- Letter J -->
+      <path d="M 275 50 L 335 50 L 335 190 C 335 230 310 255 265 255 C 235 255 210 240 195 220 L 230 185 C 238 196 250 205 265 205 C 278 205 287 197 287 185 L 287 50 Z" fill="currentColor"/>
+    </g>
+
+    <!-- Center word FILMS inside the cut -->
+    <text x="200" y="158" font-family="'Plus Jakarta Sans', 'Inter', 'Helvetica Neue', sans-serif" font-size="28" font-weight="800" letter-spacing="18" fill="currentColor" text-anchor="middle">FILMS</text>
+  </g>
+</svg>
