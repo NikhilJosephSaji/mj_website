@@ -78,28 +78,42 @@ export class AdminDashboardComponent implements OnInit {
     this.activeTab = tab;
     this.cancelEdit();
     this.resetAddForm();
-    if (tab !== 'home-bg') this.loadImages();
+    if (tab !== 'home-bg' && tab !== 'about-photo') {
+      this.loadImages();
+    }
   }
 
   get isHeroBgTab(): boolean { return this.activeTab === 'home-bg'; }
+  get isAboutPhotoTab(): boolean { return this.activeTab === 'about-photo'; }
+  get isCategoryTab(): boolean { return this.activeTab !== 'home-bg' && this.activeTab !== 'about-photo'; }
   get activeCategoryKey(): CategoryKey { return this.activeTab as CategoryKey; }
   get activeCategoryLabel(): string {
-    return this.categories.find(c => c.key === this.activeTab)?.label ?? '';
+    const cat = this.categories.find(c => c.key === this.activeTab);
+    return cat ? cat.label : (this.activeTab === 'about-photo' ? 'About Midhun Photo' : 'Home Background');
   }
 
   getCategoryCount(key: CategoryKey): number {
-    // approximate from loaded data
     return this.images.filter(i => i.category === key).length;
   }
 
   // ── Load ─────────────────────────────────────────────────────────────
 
   loadImages() {
-    if (this.isHeroBgTab) return;
+    if (this.isHeroBgTab || this.activeTab === 'about-photo') return;
     this.isLoading = true;
     this.adminService.getImagesByCategory(this.activeCategoryKey).subscribe({
-      next: imgs => { this.images = imgs; this.isLoading = false; this.cdr.detectChanges(); },
-      error: ()   => { this.isLoading = false; this.showToast('⚠️ Could not load images. Is npm start running?'); }
+      next: imgs => {
+        this.images = imgs;
+        this.isLoading = false;
+        if (imgs.length === 0) {
+          this.showAddForm = true;
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.showToast('⚠️ Could not load images. Is npm start running?');
+      }
     });
   }
 
@@ -289,6 +303,13 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  cancelAboutPhoto() {
+    this.aboutPhotoFile = null;
+    this.aboutPhotoPreview = '';
+    this.aboutError = '';
+    this.aboutSuccess = '';
+  }
+
   onAboutFileSelected(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
@@ -316,9 +337,9 @@ export class AdminDashboardComponent implements OnInit {
         this.showToast('Bio photo updated!');
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
         this.isUploadingAbout = false;
-        this.aboutError = '⚠️ Upload failed. Try again.';
+        this.aboutError = err?.error?.error || '⚠️ Upload failed. Please choose a valid image file.';
         this.cdr.detectChanges();
       }
     });
