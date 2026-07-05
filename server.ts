@@ -228,7 +228,14 @@ export function app(): express.Express {
 
   server.get('/api/about-photo', (_req: Request, res: Response): void => {
     const data = readData();
-    res.json({ aboutPhoto: data.aboutPhoto || '/api/assets/midhun.jpg' });
+    let photo = data.aboutPhoto || null;
+    if (photo) {
+      const localFile = join(ASSETS_ROOT, photo.replace(/^\/api\/assets\//, ''));
+      if (!fs.existsSync(localFile)) {
+        photo = null;
+      }
+    }
+    res.json({ aboutPhoto: photo });
   });
 
   server.delete('/api/about-photo', (_req: Request, res: Response): void => {
