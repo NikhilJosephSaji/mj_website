@@ -35,6 +35,12 @@
         </span>
         <span class="nav-label">Home Background</span>
       </button>
+      <button class="nav-item" [class.active]="activeTab === 'about-photo'" (click)="setTab('about-photo')">
+        <span class="nav-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <span class="nav-label">About Midhun Photo</span>
+      </button>
     </nav>
 
     <div class="sidebar-footer">
@@ -69,7 +75,7 @@
           <p class="hero-bg-label">Current Background</p>
           <div class="hero-bg-preview-wrap">
             <img [src]="currentHeroBg" alt="Current hero background" class="hero-bg-img-preview"/>
-            <div class="hero-bg-overlay-text">hero.png</div>
+            <div class="hero-bg-overlay-text">Active Background</div>
           </div>
         </div>
 
@@ -110,6 +116,56 @@
               <span *ngIf="isUploadingHero" class="spinner-wrap">
                 <span class="spinner-sm"></span> Uploading…
               </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <!-- ABOUT MIDHUN PHOTO TAB                                         -->
+    <!-- ═══════════════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="activeTab === 'about-photo'">
+      <header class="dash-header">
+        <div>
+          <h1 class="dash-title">About Midhun Photo</h1>
+          <p class="dash-subtitle">Manage Midhun’s biography photo on the home page</p>
+        </div>
+      </header>
+
+      <div class="hero-bg-card">
+        <div class="hero-bg-preview-wrap">
+          <div class="hero-bg-label">Current Bio Photo</div>
+          <div class="hero-current-frame" style="aspect-ratio: 4/5; max-width: 320px;">
+            <img *ngIf="currentAboutPhoto" [src]="currentAboutPhoto" alt="Midhun photo" style="object-fit: cover; object-position: 25% 15%; width:100%; height:100%" />
+            <div *ngIf="!currentAboutPhoto" class="no-bg-text">No Photo Set (Website uses wide-text layout)</div>
+          </div>
+          <button *ngIf="currentAboutPhoto" class="btn-cancel" style="margin-top: 1rem; color: #ff5555;" (click)="removeAboutPhoto()">Remove Photo</button>
+        </div>
+
+        <div class="hero-bg-upload-wrap">
+          <div class="hero-bg-label">Upload New Photo</div>
+
+          <div class="hero-drop-zone" (click)="aboutInput.click()">
+            <img *ngIf="aboutPhotoPreview" [src]="aboutPhotoPreview" class="hero-drop-preview" alt="Preview"/>
+            <div *ngIf="!aboutPhotoPreview" class="hero-drop-placeholder">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span>Click to select Midhun’s photo</span>
+            </div>
+            <input #aboutInput type="file" accept="image/*" style="display:none" (change)="onAboutFileSelected($event)"/>
+          </div>
+
+          <div class="error-bar" *ngIf="aboutError">{{ aboutError }}</div>
+          <div class="success-bar" *ngIf="aboutSuccess">{{ aboutSuccess }}</div>
+
+          <div class="hero-bg-actions">
+            <button class="btn-apply-hero" [disabled]="!aboutPhotoFile || isUploadingAbout" (click)="applyAboutPhoto()">
+              <span *ngIf="!isUploadingAbout">Apply New Photo</span>
+              <span *ngIf="isUploadingAbout" class="spinner-wrap"><span class="spinner-sm"></span> Uploading…</span>
             </button>
           </div>
         </div>

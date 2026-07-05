@@ -5,7 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AdminDataService, AdminImage, CATEGORIES, CategoryKey } from '../admin-data.service';
 
-type SidebarTab = CategoryKey | 'home-bg';
+type SidebarTab = CategoryKey | 'home-bg' | 'about-photo';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -69,6 +69,7 @@ export class AdminDashboardComponent implements OnInit {
     }
     this.loadImages();
     this.loadHeroBg();
+    this.loadAboutPhoto();
   }
 
   // ── Tab navigation ──────────────────────────────────────────────────
@@ -257,16 +258,79 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.uploadHeroBg(fd).subscribe({
       next: bg => {
         this.isUploadingHero = false;
-        this.currentHeroBg   = bg + '?t=' + Date.now(); // cache-bust
-        this.heroBgPreview   = '';
+        this.currentHeroBg   = bg + '?t=' + Date.now();
         this.heroBgFile      = null;
-        this.heroSuccess     = '✓ Hero background updated! Refresh the main site to see changes.';
-        this.showToast('Home background updated! 🏠');
+        this.heroBgPreview   = '';
+        this.heroSuccess     = '✅ Hero background updated successfully!';
+        this.showToast('Hero background updated!');
         this.cdr.detectChanges();
       },
       error: () => {
         this.isUploadingHero = false;
-        this.heroError = 'Upload failed. Make sure npm start is running.';
+        this.heroError = '⚠️ Upload failed. Try again.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ── About Midhun Photo ───────────────────────────────────────────────
+
+  currentAboutPhoto: string | null = '/api/assets/midhun.jpg';
+  aboutPhotoFile: File | null = null;
+  aboutPhotoPreview = '';
+  isUploadingAbout = false;
+  aboutError = '';
+  aboutSuccess = '';
+
+  loadAboutPhoto() {
+    this.adminService.getAboutPhoto().subscribe(p => {
+      this.currentAboutPhoto = p ? (p + '?t=' + Date.now()) : null;
+      this.cdr.detectChanges();
+    });
+  }
+
+  onAboutFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.aboutPhotoFile = file;
+    const reader = new FileReader();
+    reader.onload = e => { this.aboutPhotoPreview = e.target?.result as string; this.cdr.detectChanges(); };
+    reader.readAsDataURL(file);
+  }
+
+  applyAboutPhoto() {
+    if (!this.aboutPhotoFile) { this.aboutError = 'Please select an image first.'; return; }
+    const fd = new FormData();
+    fd.append('image', this.aboutPhotoFile);
+    this.isUploadingAbout = true;
+    this.aboutError = '';
+    this.aboutSuccess = '';
+
+    this.adminService.uploadAboutPhoto(fd).subscribe({
+      next: photo => {
+        this.isUploadingAbout = false;
+        this.currentAboutPhoto = photo + '?t=' + Date.now();
+        this.aboutPhotoFile = null;
+        this.aboutPhotoPreview = '';
+        this.aboutSuccess = '✅ Midhun’s photo updated successfully!';
+        this.showToast('Bio photo updated!');
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isUploadingAbout = false;
+        this.aboutError = '⚠️ Upload failed. Try again.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  removeAboutPhoto() {
+    if (!confirm('Are you sure you want to remove Midhun’s photo? The website will automatically use a full-width text layout.')) return;
+    this.adminService.deleteAboutPhoto().subscribe({
+      next: () => {
+        this.currentAboutPhoto = null;
+        this.showToast('Photo removed.');
+        this.cdr.detectChanges();
       }
     });
   }

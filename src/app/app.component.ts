@@ -48,6 +48,9 @@ export class AppComponent implements OnInit {
   // Lightbox Modal state
   activeLightboxItem: PortfolioItem | null = null;
   activeVideoUrl: SafeResourceUrl | null = null;
+  isDirectVideo = false;
+  isShortsOrReel = false;
+  rawVideoUrl = '';
 
   // Booking Form State
   bookingForm = {
@@ -75,17 +78,30 @@ export class AppComponent implements OnInit {
     this.isBrowser = isPlatformBrowser(platformId);
   }
 
-  heroBgUrl = 'assets/images/hero.png';
+  heroBgUrl = '/api/assets/hero.jpg';
+  aboutPhotoUrl: string | null = '/api/assets/midhun.jpg';
 
   ngOnInit() {
     this.loadPortfolioItems();
     this.loadHeroBg();
+    this.loadAboutPhoto();
   }
 
   loadHeroBg() {
     this.adminService.getHeroBg().subscribe({
       next: bg => {
         if (bg) this.heroBgUrl = bg;
+      }
+    });
+  }
+
+  loadAboutPhoto() {
+    this.adminService.getAboutPhoto().subscribe({
+      next: photo => {
+        this.aboutPhotoUrl = photo;
+      },
+      error: () => {
+        this.aboutPhotoUrl = '/api/assets/midhun.jpg';
       }
     });
   }
@@ -228,6 +244,16 @@ export class AppComponent implements OnInit {
       event.stopPropagation();
     }
     const targetUrl = url && url.trim() ? url.trim() : 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+    this.rawVideoUrl = targetUrl;
+    this.isShortsOrReel = targetUrl.toLowerCase().includes('shorts') || targetUrl.toLowerCase().includes('reel');
+
+    if (targetUrl.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i)) {
+      this.isDirectVideo = true;
+      this.activeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(targetUrl);
+      return;
+    }
+
+    this.isDirectVideo = false;
     this.activeVideoUrl = this.getSafeVideoUrl(targetUrl);
   }
 

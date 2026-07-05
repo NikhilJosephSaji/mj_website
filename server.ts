@@ -184,6 +184,19 @@ export function app(): express.Express {
     res.json({ success: true });
   });
 
+  const aboutStorage = multer.diskStorage({
+    destination(_req, _file, cb) { cb(null, ASSETS_ROOT); },
+    filename(_req, file, cb) {
+      const ext = extname(file.originalname).toLowerCase() || '.jpg';
+      ['midhun.png','midhun.jpg','midhun.jpeg','midhun.webp'].forEach(f => {
+        const p = join(ASSETS_ROOT, f);
+        if (fs.existsSync(p)) fs.unlinkSync(p);
+      });
+      cb(null, 'midhun' + ext);
+    },
+  });
+  const uploadAbout = multer({ storage: aboutStorage, limits: { fileSize: 15 * 1024 * 1024 } });
+
   server.post('/api/hero-bg', uploadHero.single('image'), (req: Request, res: Response): void => {
     if (!req.file) {
       res.status(400).json({ error: 'No file uploaded' });
@@ -199,6 +212,34 @@ export function app(): express.Express {
   server.get('/api/hero-bg', (_req: Request, res: Response): void => {
     const data = readData();
     res.json({ heroBg: data.heroBg || '/api/assets/hero.jpg' });
+  });
+
+  server.post('/api/about-photo', uploadAbout.single('image'), (req: Request, res: Response): void => {
+    if (!req.file) {
+      res.status(400).json({ error: 'No file uploaded' });
+      return;
+    }
+    const relPath = `/api/assets/${req.file.filename}`;
+    const data    = readData();
+    data.aboutPhoto = relPath;
+    writeData(data);
+    res.json({ success: true, aboutPhoto: relPath });
+  });
+
+  server.get('/api/about-photo', (_req: Request, res: Response): void => {
+    const data = readData();
+    res.json({ aboutPhoto: data.aboutPhoto || '/api/assets/midhun.jpg' });
+  });
+
+  server.delete('/api/about-photo', (_req: Request, res: Response): void => {
+    const data = readData();
+    data.aboutPhoto = null;
+    ['midhun.png','midhun.jpg','midhun.jpeg','midhun.webp'].forEach(f => {
+      const p = join(ASSETS_ROOT, f);
+      if (fs.existsSync(p)) fs.unlinkSync(p);
+    });
+    writeData(data);
+    res.json({ success: true });
   });
 
   server.get('*.*', express.static(browserDistFolder, {

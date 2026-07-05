@@ -267,12 +267,12 @@
 <!-- About Midhun Jith -->
 <section id="about" class="about-section">
   <div class="container">
-    <div class="about-grid">
-      <div class="about-img-frame glass-card">
-        <img src="assets/images/midhun.png" alt="Midhun Jith - Filmmaker" class="about-img" />
+    <div class="about-grid" [class.no-photo]="!aboutPhotoUrl">
+      <div class="about-img-frame glass-card" *ngIf="aboutPhotoUrl">
+        <img [src]="aboutPhotoUrl" alt="Midhun Jith - Filmmaker" class="about-img" />
       </div>
 
-      <div>
+      <div class="about-content">
         <div class="section-badge"><i class="ri-user-star-line"></i> The Artist Behind The Lens</div>
         <h2 style="font-size: 2.8rem; margin-bottom: 1.25rem;">Midhun <span class="text-gold">Jith</span></h2>
         <p style="font-size: 1.1rem; color: #fff; font-weight: 600; margin-bottom: 1rem;">Founder & Director of Films by MJ</p>
@@ -465,28 +465,46 @@
   </div>
 </footer>
 
-<!-- Lightbox Modal -->
-<div class="modal-backdrop" *ngIf="activeLightboxItem" (click)="closeLightbox()">
+<!-- Lightbox Modal (Redesigned Ultra-Cinematic View) -->
+<div class="modal-backdrop cinematic-modal-backdrop" *ngIf="activeLightboxItem" (click)="closeLightbox()">
   <button class="modal-close-btn" (click)="closeLightbox()"><i class="ri-close-line"></i></button>
   
-  <div style="max-width: 900px; width: 100%;" (click)="$event.stopPropagation()">
-    <div class="glass-card" style="overflow: hidden; border-radius: 20px;">
-      <img [src]="activeLightboxItem.image" [alt]="activeLightboxItem.title" style="width: 100%; max-height: 70vh; object-fit: cover;" />
-      <div style="padding: 2rem;">
-        <div class="section-badge" style="margin-bottom: 0.5rem;">{{ activeLightboxItem.categoryLabel }}</div>
-        <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">{{ activeLightboxItem.title }}</h2>
-        <p style="color: var(--accent-gold); font-size: 0.9rem; margin-bottom: 0.75rem;"><i class="ri-map-pin-line"></i> {{ activeLightboxItem.location }}</p>
-        <p class="text-muted">{{ activeLightboxItem.description }}</p>
+  <div class="lightbox-dialog" (click)="$event.stopPropagation()">
+    <div class="lightbox-card glass-card">
+      <div class="lightbox-media-wrap">
+        <img [src]="activeLightboxItem.image" [alt]="activeLightboxItem.title" class="lightbox-media-img" />
+      </div>
+
+      <div class="lightbox-details">
+        <div class="lightbox-badge-row">
+          <span class="section-badge" style="margin-bottom:0">{{ activeLightboxItem.categoryLabel }}</span>
+          <span class="lightbox-location-pill"><i class="ri-map-pin-2-fill"></i> {{ activeLightboxItem.location }}</span>
+        </div>
+
+        <h2 class="lightbox-title">{{ activeLightboxItem.title }}</h2>
+        <p class="lightbox-desc" *ngIf="activeLightboxItem.description">{{ activeLightboxItem.description }}</p>
+
+        <div class="lightbox-actions" *ngIf="activeLightboxItem.videoUrl || activeLightboxItem.category === 'cinematic'">
+          <button class="btn btn-primary play-film-btn" (click)="openVideoModal(activeLightboxItem.videoUrl, $event); closeLightbox()">
+            <i class="ri-play-fill"></i> Play Film Trailer
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Video Modal Player -->
-<div class="modal-backdrop" *ngIf="activeVideoUrl" (click)="closeVideoModal()">
-  <button class="modal-close-btn" (click)="closeVideoModal()"><i class="ri-close-line"></i></button>
-  
-  <div style="max-width: 900px; width: 100%; aspect-ratio: 16/9;" (click)="$event.stopPropagation()">
-    <iframe [src]="activeVideoUrl" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="border-radius: 16px;"></iframe>
+<!-- Video Modal Player (Compact Adaptive Screen with Header Close Bar) -->
+<div class="modal-backdrop video-modal-backdrop" *ngIf="activeVideoUrl" (click)="closeVideoModal()">
+  <div class="video-modal-wrap" [class.is-vertical]="isShortsOrReel" (click)="$event.stopPropagation()">
+    <div class="video-modal-header">
+      <span class="video-modal-title"><i class="ri-play-circle-fill"></i> Films by MJ</span>
+      <button class="video-close-btn" (click)="closeVideoModal()"><i class="ri-close-line"></i> Close</button>
+    </div>
+
+    <div class="video-modal-body">
+      <iframe *ngIf="!isDirectVideo" [src]="activeVideoUrl" width="100%" height="100%" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      <video *ngIf="isDirectVideo" [src]="rawVideoUrl" controls autoplay style="width: 100%; height: 100%; object-fit: contain;"></video>
+    </div>
   </div>
 </div>

@@ -97,5 +97,6 @@
       "addedAt": 1783244946727
     }
   ],
-  "heroBg": "/api/assets/hero.jpeg"
+  "heroBg": "/api/assets/hero.jpeg",
+  "aboutPhoto": "/api/assets/midhun.jpg"
 }

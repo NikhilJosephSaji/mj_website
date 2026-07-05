@@ -95,7 +95,7 @@ export class AdminDataService {
   getHeroBg(): Observable<string> {
     return this.http.get<{ heroBg: string }>('/api/hero-bg').pipe(
       map(r => r.heroBg),
-      catchError(() => of('assets/images/hero.png'))
+      catchError(() => of('/api/assets/hero.jpg'))
     );
   }
 
@@ -103,5 +103,24 @@ export class AdminDataService {
     return this.http.post<{ heroBg: string }>('/api/hero-bg', formData).pipe(
       map(r => r.heroBg)
     );
+  }
+
+  // ── About Midhun Photo API ──────────────────────────────────────────
+
+  getAboutPhoto(): Observable<string | null> {
+    return this.http.get<{ aboutPhoto: string | null }>('/api/about-photo').pipe(
+      map(r => r.aboutPhoto),
+      catchError(() => of('/api/assets/midhun.jpg'))
+    );
+  }
+
+  uploadAboutPhoto(formData: FormData): Observable<string> {
+    return this.http.post<{ aboutPhoto: string }>('/api/about-photo', formData).pipe(
+      map(r => r.aboutPhoto)
+    );
+  }
+
+  deleteAboutPhoto(): Observable<void> {
+    return this.http.delete<void>('/api/about-photo');
   }
 }

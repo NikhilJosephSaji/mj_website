@@ -632,3 +632,198 @@
   100% { transform: translate(-50%, -50%) scale(1);   opacity: 1; }
 }
 
+/* ── About Grid Layout (Auto-adjusts if photo absent) ────────────── */
+.about-grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+.about-grid.no-photo {
+  grid-template-columns: 1fr;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+.about-grid.no-photo .section-badge {
+  margin: 0 auto 1rem;
+}
+.about-grid.no-photo div[style*="display: flex"] {
+  justify-content: center;
+}
+
+.about-img-frame {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 1 / 1; /* Square Photo */
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 175, 55, 0.12);
+  margin: 0 auto;
+}
+.about-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ── Redesigned Cinematic Lightbox Modal ──────────────────────────── */
+.lightbox-dialog {
+  max-width: 960px;
+  width: 100%;
+  animation: lightbox-scale-in 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+@keyframes lightbox-scale-in {
+  from { opacity: 0; transform: scale(0.92) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.lightbox-card {
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  background: rgba(14, 14, 18, 0.95);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(212, 175, 55, 0.1);
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.lightbox-media-wrap {
+  position: relative;
+  width: 100%;
+  max-height: 60vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.lightbox-media-img {
+  width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+  background: #050507;
+}
+
+.lightbox-details {
+  padding: 2rem 2.5rem;
+  background: linear-gradient(180deg, rgba(14, 14, 18, 0.9) 0%, rgba(8, 8, 10, 0.98) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lightbox-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.lightbox-location-pill {
+  font-size: 0.82rem;
+  color: var(--accent-gold-light);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.lightbox-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 0.5rem;
+  line-height: 1.15;
+}
+.lightbox-desc {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.lightbox-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.play-film-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.7rem 1.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 30px;
+}
+
+/* ── Compact Adaptive Video Modal ────────────────────────────────── */
+.video-modal-wrap {
+  width: 100%;
+  max-width: 720px;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #0f0f13;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 0 0 40px rgba(212, 175, 55, 0.15);
+  animation: lightbox-scale-in 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  display: flex;
+  flex-direction: column;
+}
+.video-modal-wrap.is-vertical {
+  max-width: 420px; /* Compact portrait modal for Shorts & Instagram Reels */
+}
+
+.video-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1.2rem;
+  background: rgba(20, 20, 26, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.video-modal-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.video-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 0.35rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+.video-close-btn:hover {
+  background: rgba(239, 68, 68, 0.8);
+  border-color: rgba(239, 68, 68, 1);
+  color: #fff;
+}
+
+.video-modal-body {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+.video-modal-wrap.is-vertical .video-modal-body {
+  aspect-ratio: 9 / 16;
+  max-height: 72vh;
+}
+
+
