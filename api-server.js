@@ -201,6 +201,26 @@ app.delete('/api/images/:id', (req, res) => {
   res.json({ success: true });
 });
 
+// ── Multer — about photo ──────────────────────────────────────────────
+const aboutStorage = multer.diskStorage({
+  destination(_req, _file, cb) { cb(null, ASSETS_ROOT); },
+  filename(_req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+    ['midhun.png','midhun.jpg','midhun.jpeg','midhun.webp'].forEach(f => {
+      const p = path.join(ASSETS_ROOT, f);
+      if (fs.existsSync(p)) fs.unlinkSync(p);
+    });
+    cb(null, 'midhun' + ext);
+  },
+});
+const uploadAbout = multer({
+  storage: aboutStorage,
+  limits: { fileSize: 15 * 1024 * 1024 },
+  fileFilter(_req, file, cb) {
+    cb(null, file.mimetype.startsWith('image/'));
+  },
+});
+
 // POST /api/hero-bg
 app.post('/api/hero-bg', uploadHero.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
@@ -218,6 +238,37 @@ app.post('/api/hero-bg', uploadHero.single('image'), (req, res) => {
 app.get('/api/hero-bg', (_req, res) => {
   const data = readData();
   res.json({ heroBg: data.heroBg || '/api/assets/hero.jpg' });
+});
+
+// POST /api/about-photo
+app.post('/api/about-photo', uploadAbout.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+  const relPath = `/api/assets/${req.file.filename}`;
+  const data    = readData();
+  data.aboutPhoto = relPath;
+  writeData(data);
+
+  console.log(`📸  About photo updated: ${relPath}`);
+  res.json({ success: true, aboutPhoto: relPath });
+});
+
+// GET /api/about-photo
+app.get('/api/about-photo', (_req, res) => {
+  const data = readData();
+  res.json({ aboutPhoto: data.aboutPhoto || '/api/assets/midhun.jpg' });
+});
+
+// DELETE /api/about-photo
+app.delete('/api/about-photo', (_req, res) => {
+  const data = readData();
+  data.aboutPhoto = null;
+  ['midhun.png','midhun.jpg','midhun.jpeg','midhun.webp'].forEach(f => {
+    const p = path.join(ASSETS_ROOT, f);
+    if (fs.existsSync(p)) fs.unlinkSync(p);
+  });
+  writeData(data);
+  res.json({ success: true });
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────
