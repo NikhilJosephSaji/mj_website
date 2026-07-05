@@ -2,10 +2,7 @@
  * api-server.js
  * Standalone Express + Multer server on port 3001.
  * Handles all /api/* routes for the admin panel.
- * Saves real image files to src/assets/images/{category}/
- *
- * Run with: node api-server.js
- * (Started automatically via npm start / npm run dev)
+ * Serves uploaded images dynamically at /api/assets/* from disk.
  */
 
 const express = require('express');
@@ -21,8 +18,15 @@ const PORT = 3001;
 const ASSETS_ROOT = path.join(__dirname, 'src', 'assets', 'images');
 const DATA_FILE   = path.join(ASSETS_ROOT, 'portfolio-data.json');
 
-// ── Category → folder name ─────────────────────────────────────────────────
+// ── Clean category folder map (no spaces in web URLs) ──────────────────────
 const CATEGORY_FOLDERS = {
+  'wedding-films':   'wedding-films',
+  'portraits':       'portraits',
+  'destination':     'destination',
+  'cinematic-reels': 'cinematic-reels',
+};
+
+const CATEGORY_LABELS = {
   'wedding-films':   'Wedding Films',
   'portraits':       'Portraits',
   'destination':     'Destination',
@@ -32,7 +36,7 @@ const CATEGORY_FOLDERS = {
 // ── Helpers ────────────────────────────────────────────────────────────────
 function readData() {
   try   { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); }
-  catch { return { images: [], heroBg: 'assets/images/hero.png' }; }
+  catch { return { images: [], heroBg: '/api/assets/hero.jpg' }; }
 }
 
 function writeData(data) {
@@ -48,13 +52,14 @@ function generateId() {
 }
 
 // ── Ensure asset folders exist ────────────────────────────────────────────
+ensureDir(ASSETS_ROOT);
 Object.values(CATEGORY_FOLDERS).forEach(f => ensureDir(path.join(ASSETS_ROOT, f)));
 
 // ── Multer — category images ──────────────────────────────────────────────
 const categoryStorage = multer.diskStorage({
-  destination(req, file, cb) {
-    const cat = req.body.category || req.query.category;
-    const folder = CATEGORY_FOLDERS[cat] || 'Uncategorised';
+  destination(req, _file, cb) {
+    const cat    = req.body.category || req.query.category;
+    const folder = CATEGORY_FOLDERS[cat] || 'uncategorised';
     const dir    = path.join(ASSETS_ROOT, folder);
     ensureDir(dir);
     cb(null, dir);
@@ -99,6 +104,9 @@ const uploadHero = multer({
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 
+// Serve images dynamically directly from disk — instantly available to frontend
+app.use('/api/assets', express.static(ASSETS_ROOT));
+
 // ── Routes ────────────────────────────────────────────────────────────────
 
 // GET /api/images?category=wedding-films
@@ -116,25 +124,24 @@ app.post('/api/upload', uploadImage.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
   const { category, title, description, location, videoUrl } = req.body;
-  const targetFolder  = CATEGORY_FOLDERS[category] || 'Uncategorised';
-  const targetDir     = path.join(ASSETS_ROOT, targetFolder);
+  const targetFolder = CATEGORY_FOLDERS[category] || 'uncategorised';
+  const targetDir    = path.join(ASSETS_ROOT, targetFolder);
   ensureDir(targetDir);
 
   let finalFilename = req.file.filename;
-  let finalFilePath = req.file.path;
 
-  // If file was saved in wrong folder (e.g. Uncategorised), move it to target folder
+  // Move file if saved to wrong folder
   if (path.dirname(req.file.path) !== targetDir) {
     const newPath = path.join(targetDir, req.file.filename);
     try {
       fs.renameSync(req.file.path, newPath);
-      finalFilePath = newPath;
     } catch (e) {
       console.error('Error moving file:', e);
     }
   }
 
-  const relPath = `assets/images/${targetFolder}/${finalFilename}`;
+  // Dynamic API asset URL served directly from disk by Express
+  const relPath = `/api/assets/${targetFolder}/${finalFilename}`;
 
   const entry = {
     id:            generateId(),
@@ -142,7 +149,7 @@ app.post('/api/upload', uploadImage.single('image'), (req, res) => {
     path:          relPath,
     title:         (title || req.file.originalname).trim(),
     category,
-    categoryLabel: targetFolder,
+    categoryLabel: CATEGORY_LABELS[category] || targetFolder,
     description:   (description || '').trim(),
     location:      (location || 'India').trim(),
     videoUrl:      videoUrl || null,
@@ -153,7 +160,7 @@ app.post('/api/upload', uploadImage.single('image'), (req, res) => {
   data.images.push(entry);
   writeData(data);
 
-  console.log(`✅  Saved to ${targetFolder}: ${relPath}`);
+  console.log(`✅  Saved & Served: ${relPath}`);
   res.json({ success: true, image: entry });
 });
 
@@ -180,10 +187,13 @@ app.delete('/api/images/:id', (req, res) => {
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
 
   const img      = data.images[idx];
-  const filePath = path.join(__dirname, 'src', img.path);
+  // Convert /api/assets/folder/file -> src/assets/images/folder/file
+  const subPath  = img.path.replace(/^\/api\/assets\//, '');
+  const filePath = path.join(ASSETS_ROOT, subPath);
+
   if (fs.existsSync(filePath)) {
     fs.unlinkSync(filePath);
-    console.log(`🗑️  Deleted: ${img.path}`);
+    console.log(`🗑️  Deleted: ${filePath}`);
   }
 
   data.images.splice(idx, 1);
@@ -195,7 +205,7 @@ app.delete('/api/images/:id', (req, res) => {
 app.post('/api/hero-bg', uploadHero.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
 
-  const relPath = `assets/images/${req.file.filename}`;
+  const relPath = `/api/assets/${req.file.filename}`;
   const data    = readData();
   data.heroBg   = relPath;
   writeData(data);
@@ -207,12 +217,12 @@ app.post('/api/hero-bg', uploadHero.single('image'), (req, res) => {
 // GET /api/hero-bg
 app.get('/api/hero-bg', (_req, res) => {
   const data = readData();
-  res.json({ heroBg: data.heroBg || 'assets/images/hero.png' });
+  res.json({ heroBg: data.heroBg || '/api/assets/hero.jpg' });
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n🚀  Films by MJ — API Server`);
   console.log(`   Listening on http://localhost:${PORT}`);
-  console.log(`   Saving images to: ${ASSETS_ROOT}\n`);
+  console.log(`   Serving images live at: http://localhost:${PORT}/api/assets/\n`);
 });
