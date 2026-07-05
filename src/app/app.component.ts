@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { AdminDataService, CategoryKey } from './admin/admin-data.service';
+
 
 export interface PortfolioItem {
   id: number;
@@ -23,13 +26,14 @@ export interface Testimonial {
 }
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-main',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  private isBrowser: boolean;
   title = 'Films by MJ';
   instagramUrl = 'https://www.instagram.com/films.by.mj/';
 
@@ -57,8 +61,54 @@ export class AppComponent {
   formSubmitted = false;
   submitMessage = '';
 
-  // Portfolio Items
-  portfolioItems: PortfolioItem[] = [
+  // ── Secret 5-click admin trigger ─────────────────────────────────
+  heroClickCount = 0;  // public so template can read it
+  private heroClickTimer: any;
+
+  constructor(
+    private adminService: AdminDataService,
+    private router: Router,
+    @Inject(PLATFORM_ID) platformId: Object
+  ) {
+    this.isBrowser = isPlatformBrowser(platformId);
+  }
+
+  heroBgUrl = 'assets/images/hero.png';
+
+  ngOnInit() {
+    this.loadPortfolioItems();
+    this.loadHeroBg();
+  }
+
+  loadHeroBg() {
+    this.adminService.getHeroBg().subscribe({
+      next: bg => {
+        if (bg) this.heroBgUrl = bg;
+      }
+    });
+  }
+
+  onHeroClick() {
+    this.heroClickCount++;
+    clearTimeout(this.heroClickTimer);
+    if (this.heroClickCount >= 5) {
+      this.heroClickCount = 0;
+      // Use both router + fallback to ensure navigation works
+      this.router.navigate(['/admin/login']).then(success => {
+        if (!success) {
+          window.location.href = '/admin/login';
+        }
+      }).catch(() => {
+        window.location.href = '/admin/login';
+      });
+      return;
+    }
+    // Reset after 2.5 seconds of inactivity
+    this.heroClickTimer = setTimeout(() => { this.heroClickCount = 0; }, 2500);
+  }
+
+  // ── Default fallback portfolio items ─────────────────────────────
+  private defaultPortfolioItems: PortfolioItem[] = [
     {
       id: 1,
       title: 'Eternal Grace at Sunset',
@@ -115,6 +165,44 @@ export class AppComponent {
       description: 'Traveling across borders to craft timeless visual legacies.'
     }
   ];
+
+  portfolioItems: PortfolioItem[] = [];
+
+  loadPortfolioItems() {
+    this.adminService.getAllImages().subscribe({
+      next: adminImages => {
+        if (adminImages.length > 0) {
+          this.portfolioItems = adminImages.map(img => ({
+            id: img.addedAt,
+            title: img.title,
+            category: this.mapCategory(img.category),
+            categoryLabel: img.categoryLabel,
+            image: img.path,          // real file path served as static asset
+            location: img.location,
+            description: img.description,
+            videoUrl: img.videoUrl ?? undefined
+          }));
+        } else {
+          this.portfolioItems = [...this.defaultPortfolioItems];
+        }
+      },
+      error: () => {
+        // API not yet available — use defaults
+        this.portfolioItems = [...this.defaultPortfolioItems];
+      }
+    });
+  }
+
+  private mapCategory(key: CategoryKey): 'weddings' | 'cinematic' | 'portraits' | 'destination' {
+    const map: Record<CategoryKey, 'weddings' | 'cinematic' | 'portraits' | 'destination'> = {
+      'wedding-films':  'weddings',
+      'portraits':      'portraits',
+      'destination':    'destination',
+      'cinematic-reels':'cinematic',
+    };
+    return map[key];
+  }
+
 
   // Testimonials
   testimonials: Testimonial[] = [
