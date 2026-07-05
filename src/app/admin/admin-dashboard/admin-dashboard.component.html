@@ -129,43 +129,61 @@
       <header class="dash-header">
         <div>
           <h1 class="dash-title">About Midhun Photo</h1>
-          <p class="dash-subtitle">Manage Midhun’s biography photo on the home page</p>
+          <p class="dash-subtitle">Manage Midhun’s biography photo shown on the home page</p>
         </div>
       </header>
 
-      <div class="hero-bg-card">
-        <div class="hero-bg-preview-wrap">
-          <div class="hero-bg-label">Current Bio Photo</div>
-          <div class="hero-current-frame" style="aspect-ratio: 4/5; max-width: 320px;">
-            <img *ngIf="currentAboutPhoto" [src]="currentAboutPhoto" alt="Midhun photo" style="object-fit: cover; object-position: 25% 15%; width:100%; height:100%" />
-            <div *ngIf="!currentAboutPhoto" class="no-bg-text">No Photo Set (Website uses wide-text layout)</div>
+      <div class="hero-bg-panel">
+        <!-- Current Photo -->
+        <div class="hero-bg-current">
+          <p class="hero-bg-label">Current Bio Photo</p>
+          <div class="hero-bg-preview-wrap">
+            <img *ngIf="currentAboutPhoto" [src]="currentAboutPhoto" alt="Current Midhun photo" class="hero-bg-img-preview" style="object-fit: cover; object-position: center;"/>
+            <div *ngIf="currentAboutPhoto" class="hero-bg-overlay-text">Active Photo</div>
+            <div *ngIf="!currentAboutPhoto" class="no-bg-text" style="display:flex; align-items:center; justify-content:center; height:100%; color:rgba(255,255,255,0.4); font-size:0.85rem;">No Photo Set (Website uses wide-text layout)</div>
           </div>
-          <button *ngIf="currentAboutPhoto" class="btn-cancel" style="margin-top: 1rem; color: #ff5555;" (click)="removeAboutPhoto()">Remove Photo</button>
+          <div style="margin-top: 1rem; display: flex; justify-content: flex-end;" *ngIf="currentAboutPhoto">
+            <button class="btn-delete" (click)="removeAboutPhoto()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Remove Photo</button>
+          </div>
         </div>
 
-        <div class="hero-bg-upload-wrap">
-          <div class="hero-bg-label">Upload New Photo</div>
+        <!-- Upload New Photo -->
+        <div class="hero-bg-upload">
+          <p class="hero-bg-label">Upload New Bio Photo</p>
+          <p class="hero-bg-hint">Recommended: 1000 × 1000px (1:1 Square) · JPG, PNG, WEBP · Max 15MB</p>
 
           <div class="hero-drop-zone" (click)="aboutInput.click()">
-            <img *ngIf="aboutPhotoPreview" [src]="aboutPhotoPreview" class="hero-drop-preview" alt="Preview"/>
+            <img *ngIf="aboutPhotoPreview" [src]="aboutPhotoPreview" class="hero-drop-preview" alt="New photo preview"/>
             <div *ngIf="!aboutPhotoPreview" class="hero-drop-placeholder">
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                 <polyline points="17 8 12 3 7 8"/>
                 <line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
-              <span>Click to select Midhun’s photo</span>
+              <span>Click to choose Midhun’s photo</span>
             </div>
             <input #aboutInput type="file" accept="image/*" style="display:none" (change)="onAboutFileSelected($event)"/>
           </div>
 
-          <div class="error-bar" *ngIf="aboutError">{{ aboutError }}</div>
-          <div class="success-bar" *ngIf="aboutSuccess">{{ aboutSuccess }}</div>
+          <div class="error-bar" *ngIf="aboutError">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ aboutError }}
+          </div>
+          <div class="success-bar" *ngIf="aboutSuccess">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ aboutSuccess }}
+          </div>
 
           <div class="hero-bg-actions">
+            <button class="btn-cancel" *ngIf="aboutPhotoPreview" (click)="cancelAboutPhoto()">Cancel</button>
             <button class="btn-apply-hero" [disabled]="!aboutPhotoFile || isUploadingAbout" (click)="applyAboutPhoto()">
-              <span *ngIf="!isUploadingAbout">Apply New Photo</span>
-              <span *ngIf="isUploadingAbout" class="spinner-wrap"><span class="spinner-sm"></span> Uploading…</span>
+              <span *ngIf="!isUploadingAbout">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Apply New Photo
+              </span>
+              <span *ngIf="isUploadingAbout" class="spinner-wrap">
+                <span class="spinner-sm"></span> Uploading…
+              </span>
             </button>
           </div>
         </div>
@@ -175,7 +193,7 @@
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <!-- CATEGORY TABS                                                  -->
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    <ng-container *ngIf="!isHeroBgTab">
+    <ng-container *ngIf="isCategoryTab">
 
       <!-- Header -->
       <header class="dash-header">
@@ -297,7 +315,7 @@
         <p>Add the first image for <strong>{{ activeCategoryLabel }}</strong></p>
         <button class="btn-save" (click)="showAddForm = true">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add First Image
+          Add Image
         </button>
       </div>
 
