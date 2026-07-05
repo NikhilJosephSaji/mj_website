@@ -87,7 +87,7 @@ const heroStorage = multer.diskStorage({
     const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
     ['hero.png','hero.jpg','hero.jpeg','hero.webp'].forEach(f => {
       const p = path.join(ASSETS_ROOT, f);
-      if (fs.existsSync(p)) fs.unlinkSync(p);
+      try { if (fs.existsSync(p)) fs.unlinkSync(p); } catch (_e) {}
     });
     cb(null, 'hero' + ext);
   },
@@ -96,7 +96,8 @@ const uploadHero = multer({
   storage: heroStorage,
   limits: { fileSize: 15 * 1024 * 1024 },
   fileFilter(_req, file, cb) {
-    cb(null, file.mimetype.startsWith('image/'));
+    const ok = !file.mimetype || file.mimetype.startsWith('image/') || file.mimetype === 'application/octet-stream' || /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(file.originalname);
+    cb(null, ok);
   },
 });
 
@@ -208,7 +209,7 @@ const aboutStorage = multer.diskStorage({
     const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
     ['midhun.png','midhun.jpg','midhun.jpeg','midhun.webp'].forEach(f => {
       const p = path.join(ASSETS_ROOT, f);
-      if (fs.existsSync(p)) fs.unlinkSync(p);
+      try { if (fs.existsSync(p)) fs.unlinkSync(p); } catch (_e) {}
     });
     cb(null, 'midhun' + ext);
   },
@@ -217,7 +218,8 @@ const uploadAbout = multer({
   storage: aboutStorage,
   limits: { fileSize: 15 * 1024 * 1024 },
   fileFilter(_req, file, cb) {
-    cb(null, file.mimetype.startsWith('image/'));
+    const ok = !file.mimetype || file.mimetype.startsWith('image/') || file.mimetype === 'application/octet-stream' || /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(file.originalname);
+    cb(null, ok);
   },
 });
 
@@ -256,7 +258,14 @@ app.post('/api/about-photo', uploadAbout.single('image'), (req, res) => {
 // GET /api/about-photo
 app.get('/api/about-photo', (_req, res) => {
   const data = readData();
-  res.json({ aboutPhoto: data.aboutPhoto || '/api/assets/midhun.jpg' });
+  let photo = data.aboutPhoto || null;
+  if (photo) {
+    const localFile = path.join(ASSETS_ROOT, photo.replace(/^\/api\/assets\//, ''));
+    if (!fs.existsSync(localFile)) {
+      photo = null;
+    }
+  }
+  res.json({ aboutPhoto: photo });
 });
 
 // DELETE /api/about-photo
