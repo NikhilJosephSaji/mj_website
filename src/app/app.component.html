@@ -80,7 +80,7 @@
 <!-- Hero Section -->
 <section id="hero" class="hero-section">
   <div class="hero-bg">
-    <img src="assets/images/hero.png" alt="Films by MJ Cinematography" class="hero-bg-img" />
+    <img [src]="heroBgUrl" alt="Films by MJ Cinematography" class="hero-bg-img" />
     <div class="hero-overlay"></div>
   </div>
 
@@ -113,6 +113,14 @@
       </div>
     </div>
   </div>
+  <!-- Hidden Admin Trigger (bottom-right corner, click 5x to access admin) -->
+  <button
+    class="admin-trigger"
+    (click)="onHeroClick()"
+    [attr.data-count]="heroClickCount > 0 ? heroClickCount : null"
+    aria-label=""
+    tabindex="-1"
+  ></button>
 </section>
 
 <!-- Portfolio Section -->
