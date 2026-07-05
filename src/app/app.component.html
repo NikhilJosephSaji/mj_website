@@ -141,13 +141,13 @@
       </div>
     </div>
 
-    <div class="portfolio-grid">
+    <div class="portfolio-grid" *ngIf="filteredPortfolio.length > 0">
       <div class="portfolio-card glass-card" *ngFor="let item of filteredPortfolio" (click)="openLightbox(item)">
         <img [src]="item.image" [alt]="item.title" class="portfolio-img" />
         <div class="portfolio-card-overlay">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <span class="section-badge" style="margin-bottom: 0; background: rgba(0,0,0,0.6);">{{ item.categoryLabel }}</span>
-            <button class="play-icon-btn" *ngIf="item.videoUrl" (click)="openVideoModal(item.videoUrl, $event)" title="Play Trailer">
+            <button class="play-icon-btn" *ngIf="item.videoUrl || item.category === 'cinematic'" (click)="openVideoModal(item.videoUrl, $event)" title="Play Trailer">
               <i class="ri-play-fill"></i>
             </button>
           </div>
@@ -161,6 +161,11 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div *ngIf="filteredPortfolio.length === 0" style="text-align: center; padding: 4rem 1rem;">
+      <i class="ri-image-line" style="font-size: 2.5rem; color: rgba(212,175,55,0.4);"></i>
+      <p style="color: rgba(255,255,255,0.4); margin-top: 0.5rem; font-size: 0.95rem;">No portfolio photos uploaded yet.</p>
     </div>
   </div>
 </section>
